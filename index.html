@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Micello Map Example</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://maps.micello.com/leaflet/1.0.0/leaflet.js"></script>
+        <link rel="stylesheet" href="https://maps.micello.com/leaflet/1.0.0/leaflet.css" />
+        <script src="https://maps.micello.com/sdk/leaflet/v1/micellomap.js"></script>
+        <style>
+            body { margin:0; padding:0; }
+            #map { position:absolute; top:0; bottom:0; width:100%; }
+        </style>
+    </head>
+    <body>
+        <div id="map"></div>
+        <script>
+            var map = L.map('map');
+            /* The tile server load -- which can be omitted if the outdoor map is undesired */
+            L.tileLayer('https://a.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            var community;
+            L.micello.loader.on("indoorReady", function (e) {
+                community = L.micello.community ( 24151, {
+                    key: 'ECFQ5Thtlgt2HGdjEwu2A6df1kxZzZ'
+                }).addTo(map);
+                community.on("indoorCommunityLoadComplete", function(e){
+                    alert("Community Loaded");
+                });
+                community.on("indoorLevelGeomLoaded", function(e) {
+                    alert("Level Geom Loaded");
+                });
+            });
+        </script>
+    </body>
+</html>

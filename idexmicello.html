@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<head>
+<meta  name="viewport"  content="initial-scale=1.0,  user-scalable=no"  />
+<script  type="text/javascript"  src="https://maps.micello.com/webmap/v0/micellomap.js"></script>
+<script  type="text/javascript">
+    var mapControl;
+    var mapDataObject;
+    var mapCanvas;
+    var mapGui;
+    var mapView;
+    var cid = 24151;
+	micello.maps.init('ECFQ5Thtlgt2HGdjEwu2A6df1kxZzZ',mapInit);
+	function  mapInit()  {
+		mapControl = new micello.maps.MapControl('mapElement');
+		mapDataObject = mapControl.getMapData();
+		mapControl.onMapClick = onMapClick;             // mapclick override
+		mapDataObject.loadCommunity(cid);
+	}
+	// click override
+    function onMapClick (mx, my, clicked) {
+        if (clicked && clicked.nm) {
+               addCustomPopUp(clicked);    // whenever an item is clicked it generated popup window
+        }
+    }
+    
+    function addCustomPopUp(clicked){
+        var menuItems = new Array();
+        var level = mapDataObject.getCurrentLevel();                              // get current level object
+        if (mapControl.popupFlags && micello.maps.MapControl.SHOW_INSIDE) {     // remove this if you want to hide go inside link
+            mapControl.loadInsideCmd(clicked, menuItems);
+        }
+        if (mapControl.popupFlags && micello.maps.MapControl.SHOW_NAV) {        // shows navigate to and navigate from
+            mapControl.loadNavCmd(clicked, level.id, menuItems);
+        }
+        // call to a webservice for store info
+        var k = "gid=" + clicked.id + "&" + micello.maps.request.getMfsParams();
+        var m = micello.maps.request.pathHandler(micello.maps.request.path);
+        var c = "/map/" + cid + m;
+        var b = micello.maps.request.getMfsLang();
+        var a = micello.maps.COM_SERVICE_URL + "/detailv3" + c + "/" + b + "?" + k;
+        var name = clicked.nm + "<br/>";
+        var f = function(resp){             // callback function from webservice
+            if(resp.results){
+                for(var i = 0; i<resp.results.length; i++){
+                    if(resp.results[i].name == "phone"){
+                        name += "<span style='font-size:13px; font-weight:normal;'>"+resp.results[i].value + "</span><br/>";   // add a phone number to popup if exists
+                    }
+                }
+            }
+           name += "<span>raspberry</span>"
+           mapControl.showPopupMenu(clicked, name, menuItems);  // show popup menu
+        }
+        micello.maps.request.doRequest(a, f, micello.maps.onMapError, "GET");   // call to webservice
+    }
+    
+</script>
+<style  type="text/css">
+	html, body { height: 100%; width: 100%; margin: 0; overflow: hidden; }
+	#mapElement{ width:100%;  height:100%; }
+</style>
+</head>
+<body>
+	<div  id="mapElement"></div>
+</body>
+</html>
